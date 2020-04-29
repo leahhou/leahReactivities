@@ -1,48 +1,34 @@
-import React, { Component } from "react";
-import { Header, Icon, List } from "semantic-ui-react";
+import React, { useState, useEffect, Fragment } from "react";
+import { Header, Icon, List, Container } from "semantic-ui-react";
 import axios from "axios";
 import { IActivity } from "../models/activity";
+import NavBar from "../../features/nav/NavBar";
 
-//interface for the state
-interface IState {
-  activities: IActivity[];
-}
+const App = () => {
+  const [activities, setActivities] = useState<IActivity[]>([]); //useState & useEffect is functionality of Hook
 
-//Define Types in Component: 1st arg is the property -> {}, 2nd arg is the state -> IState
-class App extends Component<{}, IState> {
-  // not good practice by mutating state directly, rather we use setState() method
-  readonly state: IState = {
-    activities: []
-  };
-
-  componentDidMount() {
+  //similar functionality of componentdidMount function on Component Class
+  useEffect(() => {
     axios
-      // set the return Type to array of IActivity
-      // that will also insure the return type in reander() is also type of IActicity
       .get<IActivity[]>("http://localhost:5002/api/activities")
       .then(response => {
-        //setState() is used to mutate the state
-        this.setState({
-          activities: response.data
-        });
+        setActivities(response.data);
       });
-  }
+  }, []); //adding 2nd argument of empty array in useEffect params to ensure useEffect to only run once;
+  //useEffect--> 3 components of lifecycle into One
 
-  render() {
-    return (
-      <div>
-        <Header as="h2">
-          <Icon name="users" />
-          <Header.Content>Reactivities</Header.Content>
-        </Header>
+  return (
+    <Fragment>
+      <NavBar />
+      <Container style={{ marginTop: "7em" }}>
         <List>
-          {this.state.activities.map(activity => (
+          {activities.map(activity => (
             <List.Item key={activity.id}>{activity.title}</List.Item>
           ))}
         </List>
-      </div>
-    );
-  }
-}
+      </Container>
+    </Fragment>
+  );
+};
 
 export default App;
